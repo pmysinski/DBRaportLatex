@@ -6,6 +6,7 @@
 package DBRaportLatex;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,21 +17,14 @@ import java.util.logging.Logger;
  * Its bad coded but it works:)
  */
 public class DBHandle {
-    
-    String hostname;
-    String port;
-    String dbpath;
-    String encoding;
-    String user;
-    String password;
-    String engine;
-    int ok;
-    int total_errors;
-    
     Connection con;
     Statement stmt; 
     ResultSet rs;
     ResultSetMetaData rsmd;
+    int ok;
+    int total_errors;
+    
+    
     
     /** Only one constructor with many params to enstablish connection to database
      *  if it fails function is ok will return 1 and you will need to create new
@@ -46,16 +40,19 @@ public class DBHandle {
      * @param u user
      * @param pw password
      */
-    public DBHandle(String enginee,String host,String prt, String dbpathh,String enc, String u, String pw){
-      // FireBirdCreator();
-        total_errors=0;
-        engine = enginee;
-        hostname = host;
-        port = prt;
-        encoding = enc;
-        dbpath = dbpathh;
-        user = u;
-        password = pw;
+   // public DBHandle(String enginee,String host,String prt, String dbpathh,String enc, String u, String pw){
+   public DBHandle(String engine,String hostname,
+   String port, String dbpath,String encoding,
+    String user,  String password){
+        // FireBirdCreator();
+//        total_errors=0;
+//        engine = enginee;
+//        hostname = host;
+//        port = prt;
+//        encoding = enc;
+//        dbpath = dbpathh;
+//        user = u;
+//        password = pw;
         
         
         //System.out.print("jdbc:firebirdsql:" + hostname + ":" + port + "/" + dbpath + "?encoding=" + encoding);
@@ -137,20 +134,13 @@ public class DBHandle {
 
         i=0;
         while(rs.next()) {
-            
                 for(j=0;j < m; j++){
-                    
                     tmp = rs.getString(j+1);
                     if(tmp != null){
-
-         
-                     ret.setVal(tmp, i, j);
-                     
-                     
+                        ret.setVal(tmp, i, j);
                     }
                     else
                      ret.setVal("null", i, j);
-                   // System.out.println( val[i][j] );
                 }
             i++;
         }   
@@ -165,7 +155,52 @@ public class DBHandle {
         }
         return(ret);
     }
-/*
+    /*
+    public  ArrayList<byte[]> executeSQL3(String SQL){
+        int n=0,m=0,i=0,j=0;
+        byte[] tmp;
+         ArrayList<byte[]> val = new ArrayList<byte[]>();
+         try{
+           rs = stmt.executeQuery( SQL );
+           rsmd = rs.getMetaData();
+           m=rsmd.getColumnCount();
+  
+        
+       
+        
+        i=0;
+        while(rs.next()) {
+            
+                for(j=0;j < m; j++){
+                    
+                    tmp = rs.getBytes(j+1);
+                    if(tmp != null){
+
+                    val.add(tmp);
+                     
+                     
+                     
+                    }
+                    else;
+                     //ret.setVal("null", i, j);
+                   // System.out.println( val[i][j] );
+                }
+            i++;
+        }   
+        rs.close();
+        }
+        catch ( SQLException err ) {
+         
+           if( err.getErrorCode() != 0){
+       System.out.println("SQL STATEMENT PROBLEM: \n" + SQL + "\nHANDLED EXCEPTION:" +  err.getMessage( ));
+       total_errors++;
+       }
+        }
+        return(val);
+    }
+    
+    
+
      public int executeSQLupdate(String SQL){
      // System.out.println( SQL );   
       

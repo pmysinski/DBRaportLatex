@@ -21,11 +21,11 @@ import java.util.logging.Logger;
  * All variables are stored as strings.
  */
 public  class Config {
-      int ok;
-      String path;
-      
+
       String[] strindex;
       String[] value; 
+      int ok;
+      String path;
       
 
 /** Only one constructor in class Its opening file named as param pathcfg 
@@ -61,17 +61,13 @@ public  class Config {
                       if(flag == 0 && tmp.equals("#dbLatexRaportConfig"))
                           flag = 1;
                   //  System.out.print(tmp.length() + ": " + tmp + "index#:" + tmp.indexOf('#') + "\n");
-                    
                     if(flag == 1 && tmp.indexOf('#') != 0 && tmp.length() != 0 && tmp.indexOf('=') != -1){
-
-                    
                     strindextmp[count] = tmp.substring(0,tmp.indexOf('='));
                     valuetmp[count] = tmp.substring(tmp.indexOf('=')+1,tmp.length());
-                    
                     count++;
                     }
-                    
 		}
+                
                 in.close();
         
                 strindex = new String[count];
@@ -171,9 +167,7 @@ public  class Config {
      * @return value of variable
      */
     public  String getString(String name){
-        
         for(int i=0;i < value.length; i++){
-        
             if(strindex[i].indexOf(name) == 0)
                 return(value[i]);
         }

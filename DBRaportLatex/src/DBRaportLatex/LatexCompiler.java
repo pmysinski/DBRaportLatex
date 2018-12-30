@@ -29,47 +29,31 @@ public class LatexCompiler {
      * @param pdfoutputt path to output pdf files.
      */
     public LatexCompiler(String latexcompilerpathh,String pdfoutputt){
-    
         latexcompilerpath = latexcompilerpathh;
         pdfoutput = pdfoutputt;
-        
 
      File tmp = new File(pdfoutput);
     if (!tmp.exists()) {
         tmp.mkdirs();
-}
-        
-        
+        }
     
-}
-    
+    }
     /**Method to comile exact file you put as parameter.
      * 
      * @param filetexpath full path to latex file
      * @return 0
      */
     public int compileTemplate(String filetexpath){
-       
-       
-       
-       
        System.out.print( executeCommand(latexcompilerpath + " --output-directory=" + pdfoutput + " " + filetexpath));
-     // System.out.print( executeCommand("ping www.google.pl"));
-       
-       
        return(0);
    }
-   
-   
-    
-    
     
      /**Method to execute shell command. Only working in windows.
      * 
      * @param command shell command
      * @return returns from shells window after running command
      */
-    	private String executeCommand(String command) {
+    private String executeCommand(String command) {
  
 		StringBuffer output = new StringBuffer();
                 System.out.print("Executing shell command: \n" + "cmd /c start " + command);
@@ -77,9 +61,7 @@ public class LatexCompiler {
 		try {
 			p = Runtime.getRuntime().exec("cmd /c start " + command);
 			p.waitFor();
-                        
-                      //  try {Thread.sleep(5000);} catch(InterruptedException ex) {Thread.currentThread().interrupt();}
-                        
+                       
 			BufferedReader reader = 
                             new BufferedReader(new InputStreamReader(p.getInputStream()));
  
@@ -95,7 +77,5 @@ public class LatexCompiler {
 		return output.toString();
  
 	}
-    
-    
-    
+
 }

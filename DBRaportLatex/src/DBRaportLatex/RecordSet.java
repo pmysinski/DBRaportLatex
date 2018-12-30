@@ -16,16 +16,13 @@ public class RecordSet {
     int m;
     
     RecordSet(int columncount){
-  
         val = new ArrayList<String[]>();
         m = columncount;
-
     }
     
     void setVal(String str,int i, int j){
         while(val.size() <= i)
             val.add(new String[m]);
-        
         val.get(i)[j]=str;
     }
     String getVal(int i, int j){return(val.get(i)[j]);}   

@@ -32,14 +32,15 @@ public class Templates {
   String path; 
   String pathoutput;
   String encoding;
+  
   File[] listOfFiles;
+  String[] data;
+  int[] compileable;
   
   ArrayList<ArrayList<ParsedSQLInfo>> sqlinfo;
   
+  
   int ok;
-  String[] data;
-  int[] compileable;
-
   int total_errors;
     /**Only one constructor to prepare all things that are needed.
      *
@@ -54,16 +55,18 @@ public class Templates {
     pathoutput = pathout;
     encoding = enc;
     int n;
-    if(path.indexOf("\\",path.length()-1) < 0 && path.indexOf("/",path.length()-1) < 0){
+    if(path.indexOf("\\",path.length()-1) < 0 &&
+            path.indexOf("/",path.length()-1) < 0){
         path = path + "\\";
     }
-    if(pathoutput.indexOf("\\",pathoutput.length()-1) < 0 && pathoutput.indexOf("/",pathoutput.length()-1) < 0){
+    if(pathoutput.indexOf("\\",pathoutput.length()-1) < 0 && 
+            pathoutput.indexOf("/",pathoutput.length()-1) < 0){
         pathoutput = pathoutput + "\\";
     }
     File tmp = new File(pathoutput);
     if (!tmp.exists()) {
         tmp.mkdirs();
-}
+    }
     
     
     int test,k=0;
@@ -77,7 +80,8 @@ public class Templates {
      if (listOfFilestmp[i].isFile()) 
      {
      test = listOfFilestmp[i].getName().indexOf(".tex");
-        if(test != -1 && listOfFilestmp[i].getName().length()-".tex".length()-test == 0){
+        if(test != -1 && listOfFilestmp[i].getName().length()
+                -".tex".length()-test == 0){
             files[k] = listOfFilestmp[i].getName();
             k++;
            }
@@ -91,7 +95,6 @@ public class Templates {
     data = new String[k];
     for (int i = 0; i < listOfFiles.length; i++){
        listOfFiles[i] = new File(path + files[i]);
-      //  System.out.print(listOfFiles[i].getName()+ "\n");
     }
     ok = 0;
     }
@@ -115,36 +118,25 @@ public class Templates {
      *
      * @param k number of template file in alfabetical order
      */
-    public void LoadTemplate(int k){
+    public void loadTemplate(int k){
       
       try {
 		BufferedReader in = new BufferedReader(
 		   new InputStreamReader(
                       new FileInputStream(listOfFiles[k]), encoding));
  
-		String str="";
+                StringBuilder str = new StringBuilder();;
                 String tmp;
 		while ((tmp = in.readLine()) != null) {
-		    str = str + tmp + "\n";
+		    str.append(tmp+"\n");
 		}
                 in.close();
                 in = null;
-                data[k]=str;
+                data[k]=str.toString();
                 System.out.println( "Loaded file: " +  listOfFiles[k].getPath());
                 
-                
-                String start = "\\begin{document}";
-                String end = "\\end{document}";
-                int from = data[k].indexOf(start);
-                int to = data[k].indexOf(end);
-                
-                if(from == -1 || to == -1)
-                    compileable[k] = 0;
-                else
-                    compileable[k] = 1;
-                
-                
-                
+                isCompilable(k);
+
       }
       	    catch (UnsupportedEncodingException e) 
 	    {
@@ -160,6 +152,18 @@ public class Templates {
 	    }
   }
 
+    private void isCompilable(int k) {
+        String start = "\\begin{document}";
+        String end = "\\end{document}";
+        int from = data[k].indexOf(start);
+        int to = data[k].indexOf(end);
+        
+        if(from == -1 || to == -1)
+            compileable[k] = 0;
+        else
+            compileable[k] = 1;
+    }
+
     /**Method which save k template in alfabetical order in folder you set earlier. 
      *
      * @param k number of template file in alfabetical order
@@ -168,11 +172,6 @@ public class Templates {
       
       try {
           PrintWriter output = new PrintWriter(pathoutput + listOfFiles[k].getName(),encoding);
-          //System.out.println(data[k]);
-          
-
-          
-          
           output.print(data[k]);
           output.close();
           output = null;
@@ -182,6 +181,18 @@ public class Templates {
       }
        
   }
+    
+    /**Method to load all templates from folder you set earlier.
+     *
+     */
+    public void loadAllTemplates(){
+      
+      for (int i = 0; i < listOfFiles.length; i++){
+          this.loadTemplate(i);
+      }
+  }
+ 
+    
     
     /**Method to save all templates.
      *
@@ -194,54 +205,7 @@ public class Templates {
        
   }
   
-    /**Method to load all templates from folder you set earlier.
-     *
-     */
-    public void loadAllTemplates(){
-      
-      for (int i = 0; i < listOfFiles.length; i++){
-          this.LoadTemplate(i);
-      }
-  }
-  
-    /**Method to parse k file in alfabetical order and get all sql statements also
-     * their grouping and enviroment name by using regex pattern. 
-     *
-     * @param k  number of template file in alfabetical order
-     * @param pat regex pattern to parse 3 groups of statement.
-     * @return table of sql queries
-     */
-  public String[][] getSqlStatements(int k,String pat)
-  {
-    String[][] arrayOfString1 = new String[200][4];
-    int i = 0;
-    if(pat.equals(""))
-        pat = "@@(?:([a-zA-Z]+)(?:@([0-9, ]+))?)?@@(.+?)@END@(.*?\\n|.*)";
-    
-    Pattern localPattern = Pattern.compile(pat, Pattern.DOTALL | Pattern.MULTILINE);
-    Matcher localMatcher = localPattern.matcher(this.data[k]);
-    while (localMatcher.find())
-    {
-      arrayOfString1[i][0] = localMatcher.group(2);
-      arrayOfString1[i][1] = localMatcher.group(3);
-      arrayOfString1[i][2] = localMatcher.group(1);
-      arrayOfString1[i][3] = localMatcher.group(0);
-      i++;
-     // sqlinfo.get(k).add(new ParsedSQLInfo(localMatcher.group(3),localMatcher.group(1), localMatcher.group(2), localMatcher.end()));
-      
-    }
-    String[][] arrayOfString2 = new String[i][4];
-    for (int j = 0; j < i; j++)
-    {
-      arrayOfString2[j][0] = arrayOfString1[j][0];
-      arrayOfString2[j][1] = arrayOfString1[j][1];
-      arrayOfString2[j][2] = arrayOfString1[j][2];
-      arrayOfString2[j][3] = arrayOfString1[j][3];
-    }
-    return arrayOfString2;
-  }
-  
-  
+
   
     /**Method to parse k file in alfabetical order and save in object all sql statements also
      * their grouping and enviroment name by using regex pattern. 
@@ -257,15 +221,13 @@ public class Templates {
     Matcher localMatcher;
     for(int k=0;k < this.getLenght();k++){
 
-    localMatcher = localPattern.matcher(this.data[k]);
-    while (localMatcher.find())
-        {
-          sqlinfo.get(k).add(new ParsedSQLInfo(localMatcher.group(3),localMatcher.group(1), localMatcher.group(2), localMatcher.end()));
+        localMatcher = localPattern.matcher(this.data[k]);
+        while (localMatcher.find())
+            {
+              sqlinfo.get(k).add(new ParsedSQLInfo(localMatcher.group(3),
+              localMatcher.group(1), localMatcher.group(2), localMatcher.end()));
+            }
         }
-    }
-    
-    
-    
   }
   
    
@@ -284,26 +246,17 @@ public class Templates {
     public int prepareValues(int k,int c,String env,String grouping,RecordSet rs){
         if(rs == null)
             return(0);
-        
-       String start = "\\begin{document}";
-       String end = "\\end{document}";
-      // int to = this.data[k].indexOf(where) + where.length();
-   //    rs.toPrint();
-    //   if(from > to || from < 0 || to < 0)
-    //       return(1);
+
         char l = (char) ('A' + (char)c);
         String prefix;
         if(env == null)
             prefix =  listOfFiles[k].getName().substring(0,listOfFiles[k].getName().indexOf('.')) + l;
         else
             prefix = env;
-        
-      //  System.out.println("PREFIX:'" + prefix +"'");
-      //  System.out.println("ENV:'" + env +"'");
-        
-        
+      
        if(grouping == null){
            prepareValuesSimple(k,c, prefix, rs);
+           System.out.println(  rs.get_rows() + " records SQL" + (c+1));  
        }
        else{
            String[] groupstmp = grouping.split(",");
@@ -311,7 +264,6 @@ public class Templates {
            for(int i=0;i<groupstmp.length;i++)
                group[i] = Integer.parseInt(groupstmp[i]);
            
-
           sqlinfo.get(k).get(c).setData(prepareValuesGrouping(group, 0,0,rs.get_rows(),  rs, prefix)); 
           
            groupstmp = null;
@@ -341,21 +293,15 @@ public class Templates {
       StringBuilder result = new StringBuilder(); 
        
         for(int i=0; i < rs.get_rows(); i++){
-  
-         temp1 = "\\" + prefix;
+            temp1 = "\\" + prefix;
         for(int j=0; j < rs.get_cols(); j++)
-           temp1 += "{" + rs.getVal(i, j) + "}";
+            temp1 += "{" + rs.getVal(i, j) + "}";
         
           result.append(temp1 + "\n");
-   //     temp2 = temp2.concat(temp1 + "\n");
       }
-        
-     temp2 = result.toString();
-        
-        
-       sqlinfo.get(k).get(c).setData(temp2); 
 
-       System.out.println(  rs.get_rows() + " records SQL" + (c+1));  
+     temp2 = result.toString();
+     sqlinfo.get(k).get(c).setData(temp2); 
     return(0);
 }
       
@@ -390,13 +336,11 @@ public class Templates {
           int index1=s;
           int index2=s;
           int check=0;
-          
 
           int col =0;
           for(int i=0;i<gid;i++)
               col += group[i];
           
-
           index2++;
           while(index2 <= rs.get_rows() && index2 <= e){
            if(index2 == rs.get_rows() || index2 == e)
@@ -415,20 +359,15 @@ public class Templates {
                for(int i=0;i<group[gid];i++)
                   strtmp += "{" + rs.getVal(index1,i+col)+ "}";
                
-         //    System.out.print("odalam w " +  gid + " index1:" + index1 + " index2:" + index2 + "\n");
               strtmp += "\n"; 
               strtmp += prepareValuesGrouping(group, gid+1,index1, index2, rs, prefix);
-              
-              
               endin =  "\\end" + prefix + x + "\n";
 
               result.append(strtmp.concat(endin));
 
-               
                index1 = index2;
                check = 0;
            }
-
             index2++;
           }
           return(result.toString());    
@@ -442,11 +381,9 @@ public class Templates {
        String temp1 = "";
        String temp2 = "";
 
-       
        StringBuilder result = new StringBuilder();
 
         for(int i=s; i < e; i++){
-  
          temp1 = "\\" + prefix;
         for(int j=sc; j < rs.get_cols(); j++)
          temp1 += "{" + rs.getVal(i, j) + "}";
@@ -503,10 +440,7 @@ public class Templates {
      *  @param k number of file in alfabetical order 
      *  @return file name in String
      */
-     public String getFileName(int k ){
-        return(listOfFiles[k].getName());
-        
-    }
+     public String getFileName(int k ){return(listOfFiles[k].getName());}
     
     /** Error Count
      *  @return number of errors in object

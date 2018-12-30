@@ -5,7 +5,9 @@
  */
 package DBRaportLatex;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -33,12 +35,8 @@ public class DBRaportLatex {
      * @throws java.sql.SQLException something went wrong
      */
     
-    public static void main(String[] args) throws IOException, SQLException {
+    public static void main(String[] args) {
 
-        
-        
-        
-      
         final String WORKDIR = System.getProperty("user.dir");
 
 
@@ -114,7 +112,8 @@ public class DBRaportLatex {
               }
               else
                   //executing queries and saving data to object templates
-                temps.prepareValues(i,j,SQLSt.get(j).getName(),SQLSt.get(j).getGroup(),FBH.executeSQL2(SQLSt.get(j).getQuery()));
+                temps.prepareValues(i,j,SQLSt.get(j).getName(),
+                SQLSt.get(j).getGroup(),FBH.executeSQL2(SQLSt.get(j).getQuery()));
             }
         }
         
@@ -145,7 +144,7 @@ public class DBRaportLatex {
   
       }
       
-      //WORK DONE OR IS IT? ERRRORS count also.
+      //WORK DONE OR ISNT IT? ERRRORS count also.
         System.out.print("\n\n\nWORK DONE"); 
         if(temps.getErrorCount() > 0 || FBH.getErrorCount()> 0){
             System.out.println(" WITH ERRORS!!!");
@@ -161,6 +160,23 @@ public class DBRaportLatex {
         System.out.println("Directory pdf results output: " + cfg.getString("output"));   
       
       
+        
+        
+        
+//        if(cfg.getString("debugrys").equals("1")){
+//            ArrayList<byte[]> ret;
+//            ret = FBH.executeSQL3("SELECT image FROM bloby");
+//            for(int i=0;i<ret.size();i++){
+//                FileOutputStream fos = new FileOutputStream(Integer.toString(i)+".jpg");
+//                fos.write(ret.get(i));
+//                fos.close();
+//            }
+//                
+//        }
+            
+        
+        
+        
       
     }
 
